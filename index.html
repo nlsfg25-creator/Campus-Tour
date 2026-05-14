@@ -11,7 +11,7 @@
         .container { padding: 20px; max-width: 1000px; margin: auto; }
         .section { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); margin-bottom: 25px; }
         
-        /* EXPLORE PAGE - Restored Activity Styles */
+        /* EXPLORE PAGE */
         .vocab-list { display: flex; flex-direction: column; align-items: center; gap: 35px; }
         .card { background: white; border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; width: 90%; max-width: 850px; border: 6px solid #eee; transition: transform 0.2s; }
         .card img { width: 100%; height: auto; max-height: 450px; object-fit: cover; border-radius: 15px; }
@@ -30,7 +30,7 @@
         .correct { border-color: #22c55e !important; background: #f0fff4 !important; }
         .wrong { border-color: #ff4f4f !important; background: #fff0f0 !important; }
 
-        /* BUILDER UI */
+        /* BUILDER */
         .sentence-box { min-height: 120px; border: 5px dashed #2c6bed; padding: 25px; font-size: 28px; border-radius: 20px; background: #fff; margin-bottom: 25px; text-align: center; color: #1a56d1; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
         .group { margin-bottom: 20px; padding: 15px; border-radius: 15px; }
         .bg-blue { background: #e7f0ff; border-left: 10px solid #2c6bed; }
@@ -98,10 +98,10 @@
             <div class="group bg-blue"><h3>1. Start:</h3>
                 <button class="word start-desc" onclick="addWord('Our school is', 'desc')">Our school is</button>
                 <button class="word start-desc" onclick="addWord('My school is', 'desc')">My school is</button>
-                <button class="word start-act" onclick="addWord('I visit', 'act')">I visit</button>
-                <button class="word start-act" onclick="addWord('We visit', 'act')">We visit</button>
-                <button class="word start-act" onclick="addWord('I like', 'act')">I like</button>
-                <button class="word start-act" onclick="addWord('We like', 'act')">We like</button>
+                <button class="word start-act" onclick="addWord('I visit', 'visit')">I visit</button>
+                <button class="word start-act" onclick="addWord('We visit', 'visit')">We visit</button>
+                <button class="word start-act" onclick="addWord('I like', 'like')">I like</button>
+                <button class="word start-act" onclick="addWord('We like', 'like')">We like</button>
             </div>
             <div class="group bg-green" id="groupPlace"><h3>2. Choose a Place:</h3><div id="builderPlaces"></div></div>
             <div class="group bg-yellow"><h3>3. Connect:</h3>
@@ -148,7 +148,6 @@ let quizPool = [];
 
 function formatPe(str) { return str.replace(/\bpe\b/gi, "PE"); }
 
-// Restore Explore Page Logic with Activity Box
 const listDiv = document.getElementById('vocabList');
 campusData.forEach(item => {
     const card = document.createElement('div');
@@ -230,7 +229,16 @@ function showBuilder() {
             const popup = document.getElementById('actionPopup');
             popup.innerHTML = `<h3 style="text-align:center">${item.name}</h3>`;
             item.acts.forEach(a => {
-                popup.innerHTML += `<button class="word" style="background:#fcc419; width:90%;" onclick="addWord('the ${item.name} to ${formatPe(a.toLowerCase())}'); hideAct()">${formatPe(a)}</button>`;
+                let finalPhrase = "";
+                // LOGIC REVISION: 
+                if(sentenceType === 'visit') {
+                    // Pattern: I visit the Library to read books.
+                    finalPhrase = `the ${item.name} to ${formatPe(a.toLowerCase())}`;
+                } else {
+                    // Pattern: I like to read books in the Library.
+                    finalPhrase = `to ${formatPe(a.toLowerCase())} in the ${item.name}`;
+                }
+                popup.innerHTML += `<button class="word" style="background:#fcc419; width:90%;" onclick="addWord('${finalPhrase}'); hideAct()">${formatPe(a)}</button>`;
             });
             popup.innerHTML += `<button class="word control-btn" style="background:#ddd; width:90%;" onclick="hideAct()">Cancel</button>`;
             popup.classList.remove('hidden');
@@ -260,7 +268,7 @@ function updateBuilderLogic() {
     if (sentenceType === 'desc') {
         document.querySelectorAll('.start-act, .place-btn, .connect-act-only').forEach(b => b.classList.add('locked'));
     } 
-    else if (sentenceType === 'act') {
+    else if (sentenceType === 'visit' || sentenceType === 'like') {
         document.querySelectorAll('.start-desc, .connect-desc-only, .desc-word').forEach(b => b.classList.add('locked'));
     }
 
